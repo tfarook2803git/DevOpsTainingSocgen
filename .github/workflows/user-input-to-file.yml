@@ -1,0 +1,50 @@
+name: User Input to File
+
+on:
+  workflow_dispatch:
+    inputs:
+      file_name:
+        description: 'Name of the file to create'
+        required: true
+        default: 'user_input.txt'
+      file_content:
+        description: 'Content to write to the file'
+        required: true
+        default: 'Hello from GitHub Actions'
+
+jobs:
+  create-file-from-input:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Create directory for output
+        run: mkdir -p output
+      
+      - name: Write user input to file
+        run: |
+          content="${{ github.event.inputs.file_content }}"
+          content_length=${#content}
+          
+          if [ $content_length -lt 10 ]; then
+            filename="${content}.txt"
+          else
+            filename="${{ github.event.inputs.file_name }}"
+          fi
+          
+          echo "$content" > output/$filename
+          echo "FILENAME=$filename" >> $GITHUB_ENV
+      
+      - name: Display file content
+        run: |
+          echo "File created: output/${{ env.FILENAME }}"
+          echo "Content:"
+          cat output/${{ env.FILENAME }}
+      
+      - name: Upload file as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: user-input-file
+          path: output/${{ env.FILENAME }}
+          retention-days: 7
