@@ -1,4 +1,4 @@
-name: Copy File Workflow
+name: Copy Multiple File Workflow
 
 # Controls when the workflow will run
 on:
