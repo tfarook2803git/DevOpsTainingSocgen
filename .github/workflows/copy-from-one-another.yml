@@ -49,6 +49,9 @@ jobs:
     
     - name: Package application
       run: mvn -B package -DskipTests
+
+    - name: Display content of demo.txt from another repo
+      run: cat tfarook2803git/febbatch1/demo.txt
     
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
