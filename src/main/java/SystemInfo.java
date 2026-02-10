@@ -15,8 +15,8 @@ public class SystemInfo {
         
         // RAM Information
         System.out.println("--- RAM INFORMATION ---");
-        long totalMemory = osBean.getTotalMemorySize();
-        long freeMemory = osBean.getFreeMemorySize();
+        long totalMemory = osBean.getTotalPhysicalMemorySize();
+        long freeMemory = osBean.getFreePhysicalMemorySize();
         long usedMemory = totalMemory - freeMemory;
         
         System.out.println("Total RAM: " + formatBytes(totalMemory));
