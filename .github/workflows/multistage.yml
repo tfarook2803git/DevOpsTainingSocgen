@@ -1,0 +1,96 @@
+name: Multistage Workflow
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment Environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - hml
+          - prod
+        default: 'dev'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        java-version: [11]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up JDK ${{ matrix.java-version }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: 'temurin'
+        cache: maven
+    
+    - name: Build with Maven
+      run: mvn -B clean compile
+    
+    - name: Run tests
+      run: mvn -B test
+    
+    - name: Package application
+      run: mvn -B package -DskipTests
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: calculator-jar-jdk-${{ matrix.java-version }}
+        path: target/*.jar
+        retention-days: 7
+ 
+  deploytodev:
+    runs-on: ubuntu-latest
+    needs: build
+    name: Deploy to ${{ inputs.environment }} environment
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+    
+    strategy:
+      matrix:
+        java-version: [11]
+    
+    steps:
+      - name: echo environment and java version
+        run: echo "Deploying to ${{ inputs.environment }} environment with Java ${{ matrix.java-version }}"
+
+  deploytohml:
+    runs-on: ubuntu-latest
+    needs: build
+    name: Deploy to ${{ inputs.environment }} environment
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+    
+    strategy:
+      matrix:
+        java-version: [11]
+    
+    steps:
+      - name: echo environment and java version
+        run: echo "Deploying to ${{ inputs.environment }} environment with Java ${{ matrix.java-version }}" 
+  
+  deploytoprod:
+    runs-on: ubuntu-latest
+    needs: build
+    name: Deploy to ${{ inputs.environment }} environment
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+    
+    strategy:
+      matrix:
+        java-version: [11]
+    
+    steps:
+      - name: echo environment and java version
+        run: echo "Deploying to ${{ inputs.environment }} environment with Java ${{ matrix.java-version }}" 
