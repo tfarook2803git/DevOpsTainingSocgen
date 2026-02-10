@@ -26,25 +26,32 @@ jobs:
         run: |
           content="${{ github.event.inputs.file_content }}"
           content_length=${#content}
-          
-          if [ $content_length -lt 10 ]; then
-            filename="${content}.txt"
+
+          # sanitize user-provided content for use as filename: keep alphanumerics, underscore and hyphen
+          safe_filename=$(printf "%s" "$content" | tr -cd '[:alnum:]_-' )
+          if [ -z "$safe_filename" ]; then
+            safe_filename="unnamed"
+          fi
+
+          if [ "$content_length" -lt 10 ]; then
+            filename="${safe_filename}.txt"
           else
             filename="${{ github.event.inputs.file_name }}"
           fi
-          
-          echo "$content" > output/$filename
+
+          mkdir -p output
+          printf '%s' "$content" > "output/$filename"
           echo "FILENAME=$filename" >> $GITHUB_ENV
-      
+
       - name: Display file content
         run: |
           echo "File created: output/${{ env.FILENAME }}"
           echo "Content:"
-          cat output/${{ env.FILENAME }}
+          cat "output/${{ env.FILENAME }}"
       
       - name: Upload file as artifact
         uses: actions/upload-artifact@v4
         with:
           name: user-input-file
-          path: output/${{ env.FILENAME }}
+          path: "output/${{ env.FILENAME }}"
           retention-days: 7
