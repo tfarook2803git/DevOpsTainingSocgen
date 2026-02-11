@@ -5,7 +5,7 @@ resource "aws_instance" "example" {
   count         = var.instance_count
 
   tags = {
-    Name = "Instance-${count.index + 1}"
+    Name = "Farook-Instance-${count.index + 1}"
   }
 }
 
