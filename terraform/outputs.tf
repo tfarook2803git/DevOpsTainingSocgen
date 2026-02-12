@@ -8,5 +8,9 @@ output "instance_id_2" {
   value       = aws_instance.example.*.id[1]
 }
 
+output "ecr_repository_name" {
+  description = "Name of the ECR repository"
+  value       = aws_ecr_repository.my_ecr.name
+}
 
 
