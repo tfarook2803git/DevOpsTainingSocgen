@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "my_ecr" {
-  name = "my-ecr-repo"
+  name = "farook-ecr-repo"
   image_tag_mutability = "MUTABLE"
   region = var.aws_region
 
