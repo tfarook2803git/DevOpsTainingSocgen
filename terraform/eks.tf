@@ -1,45 +1,37 @@
-resource "aws_eks_cluster" "example" {
-  name = "farook-eks-cluster"
-  role_arn = aws_iam_role.cluster.arn
-  version  = "1.34"
+resource "aws_eks_cluster" "this" {
+  name     = var.cluster_name
+  role_arn = aws_iam_role.eks_cluster_role.arn
+  version  = "1.29"
 
   vpc_config {
-    subnet_ids = [
-      "subnet-08c1fb2a582442df6",
-      "subnet-07e0884a91540d7f1",
-      "subnet-0946aebdaddb00f6f"
-    ]
-  }
-    depends_on = [
-    aws_iam_role_policy_attachment.eks_cluster_policy,
-  ]
-}
-
-
-# Worker Nodes
-# -------------------------------
-resource "aws_eks_node_group" "demo_nodes" {
-  cluster_name    = aws_eks_cluster.example.name
-  node_group_name = "demo-nodes"
-  node_role_arn   = aws_iam_role.eks_node_role.arn
-  subnet_ids = [
-      "subnet-08c1fb2a582442df6",
-      "subnet-07e0884a91540d7f1",
-      "subnet-0946aebdaddb00f6f"
-  ]
-
-  instance_types = ["t3.small"]
-
-  scaling_config {
-    desired_size = 1
-    max_size     = 2
-    min_size     = 1
+    subnet_ids = data.aws_subnets.selected.ids
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.node_policy_1,
-    aws_iam_role_policy_attachment.node_policy_2,
-    aws_iam_role_policy_attachment.node_policy_3
+    aws_iam_role_policy_attachment.cluster_policy
+  ]
+}
+
+# Worker Nodes
+# -------------------------------
+resource "aws_eks_node_group" "this" {
+  cluster_name    = aws_eks_cluster.this.name
+  node_group_name = "${var.cluster_name}-node-group"
+  node_role_arn   = aws_iam_role.node_role.arn
+  subnet_ids      = data.aws_subnets.selected.ids
+
+  scaling_config {
+    desired_size = 2
+    max_size     = 3
+    min_size     = 1
+  }
+
+  instance_types = ["t3.medium"]
+
+  depends_on = [
+    aws_iam_role_policy_attachment.worker_node_policy,
+    aws_iam_role_policy_attachment.cni_policy,
+    aws_iam_role_policy_attachment.registry_policy
   ]
 }
 
